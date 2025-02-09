@@ -2,8 +2,8 @@ plugins {
     id("java")
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+group = "ru.homework"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -14,6 +14,16 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks.register('homework1Tests', Test) {
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        exceptionFormat "full"
+    }
+    useJUnitPlatform {
+        includeTags('Homework1')
+    }
+}
+
+tasks.withType(Test).configureEach {
+    outputs.upToDateWhen { false }
 }
