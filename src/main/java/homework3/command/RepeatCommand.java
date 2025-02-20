@@ -4,6 +4,7 @@ import homework3.exceptions.SecondAttemptException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+
 @AllArgsConstructor
 public class RepeatCommand implements ICommand {
 

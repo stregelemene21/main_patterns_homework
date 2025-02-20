@@ -1,29 +1,18 @@
 package homework3.handlers;
 
-import homework3.CommandQueue;
 import homework3.command.ICommand;
-import homework3.command.LogCommand;
 import homework3.command.RepeatCommand;
-import homework3.command.RepeatTwiceCommand;
 import homework3.exceptions.SecondAttemptException;
-import homework3.store.CommandLog;
+import lombok.AllArgsConstructor;
 
-public class SecondAttemptHandler extends AbstractExceptionHandler {
+@AllArgsConstructor
+public class SecondAttemptHandler extends AbstractHandler {
+
+    ICommand repeatedTwiceCommand;
 
     @Override
     public void execute() {
-        var command = CommandLog.getInstance().getLastExecutedCommand();
-        Class<? extends ICommand> repeatedCommand;
-        if (command.getClass().equals(RepeatTwiceCommand.class)) {
-            repeatedCommand = ((RepeatTwiceCommand) command).getBaseCommand().getClass();
-
-//            Logger.logException(
-//                    ((RepeatCommand) command).getBaseCommand().getClass(),
-//                    new SecondAttemptRepeatException(repeatedCommand));
-
-            var logCommand = new LogCommand(repeatedCommand,
-                    new SecondAttemptException(repeatedCommand));
-            CommandQueue.getInstance().addCommand(logCommand);
-        }
+        var baseCommandClass = ((RepeatCommand) repeatedTwiceCommand).getBaseCommand().getClass();
+        writeToLog(baseCommandClass, new SecondAttemptException(baseCommandClass));
     }
 }

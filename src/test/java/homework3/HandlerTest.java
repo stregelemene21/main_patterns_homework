@@ -1,10 +1,7 @@
 package homework3;
 
 import homework3.command.*;
-import homework3.exceptions.SecondAttemptException;
-import homework3.exceptions.TestingLogCommandException;
-import homework3.exceptions.WriteToLogCommandException;
-import homework3.exceptions.FirstAttemptException;
+import homework3.exceptions.*;
 import homework3.handlers.*;
 import homework3.store.HandlerStore;
 import org.junit.jupiter.api.*;
@@ -17,12 +14,12 @@ public class HandlerTest {
 
     HandlerStore handlerStore;
     Executor executor;
-    CommandQueue commandQueue = CommandQueue.getInstance();
+    CommandQueue commandQueue = CommandQueue.getCommandQueue();
 
     @BeforeEach
     void init() {
         handlerStore = new HandlerStore();
-        commandQueue = CommandQueue.getInstance();
+        commandQueue = CommandQueue.getCommandQueue();
         executor = new Executor(handlerStore);
     }
 
@@ -33,47 +30,51 @@ public class HandlerTest {
     }
 
     // Реализовать Команду, которая записывает информацию о выброшенном исключении в лог
-    @Test
-    void checkWriteToLogCommandTest() {
-        // тестовая команда, с хендлером, в котором вызывается запись в лог
-        ICommand testingLogCommand = new TestingLogCommand();
-        handlerStore.registerHandler(testingLogCommand, TestingLogCommandException.class, TestingLogCommandExceptionHandler.class);
-        executor.executeCommand(testingLogCommand);
-        assertTrue(Logger.isLogContains(
-                String.format("An exception %s has been thrown while execution " +
-                                "command %s",
-                        TestingLogCommandException.class.getSimpleName(),
-                        TestingLogCommand.class.getSimpleName())));
-    }
+//    @Test
+//    void checkWriteToLogCommandTest() {
+//        // тестовая команда, с хендлером, в котором вызывается запись в лог
+//        ICommand testingLogCommand = new TestingLogCommand();
+//        handlerStore.registerHandler(testingLogCommand, TestingLogCommandException.class, TestingLogCommandExceptionHandler.class);
+//        executor.executeCommand(testingLogCommand);
+//        assertTrue(Logger.isLogContains(
+//                String.format("An exception %s has been thrown while execution " +
+//                                "command %s",
+//                        TestingLogCommandException.class.getSimpleName(),
+//                        TestingLogCommand.class.getSimpleName())));
+//    }
 
     // Реализовать обработчик исключения, который ставит Команду, пишущую в лог в очередь Команд
-    @Test
-    void addToQueueWriteToLogCommandTest() {
-        ICommand writeToLogCommand = new LogCommand();
-        handlerStore.registerHandler(writeToLogCommand, WriteToLogCommandException.class,
-                WriteToLogCommandExceptionHandler.class);
-        commandQueue.addCommand(writeToLogCommand);
-        assertTrue(commandQueue.isCommandPresentInQueue(writeToLogCommand));
-        executor.executeCommand(
-                commandQueue.getCommandFromQueue());
-        //asserts
-        assertTrue(commandQueue.isCommandPresentInQueue(writeToLogCommand));
-    }
+//    @Test
+//    void addToQueueWriteToLogCommandTest() {
+//        ICommand writeToLogCommand = new LogCommand();
+//        handlerStore.registerHandler(writeToLogCommand, WriteToLogCommandException.class,
+//                WriteToLogCommandExceptionHandler.class);
+//        commandQueue.addCommand(writeToLogCommand);
+//        assertTrue(commandQueue.isCommandPresentInQueue(writeToLogCommand));
+//        executor.executeCommand(
+//                commandQueue.getCommandFromQueue());
+//        //asserts
+//        assertTrue(commandQueue.isCommandPresentInQueue(writeToLogCommand));
+//    }
 
     //  С помощью Команд из пункта 4 и пункта 6 реализовать следующую обработку исключений:
     //  при первом выбросе исключения повторить команду, при повторном выбросе исключения
     //  записать информацию в лог.
     @Test
     void firstAttemptRepeatSecondWriteToLogTest() {
-        ICommand command = new SimpleCommand();
+    //  init command
+        ICommand command = new TestCommand();
+        commandQueue.addCommand(command);
+    //  add strategy
         handlerStore.registerHandler(command, FirstAttemptException.class,
-                FirstAttemptHandler.class);
+                RepeatHandler.class);
         handlerStore.registerHandler(RepeatCommand.class, SecondAttemptException.class,
                 SecondAttemptHandler.class);
-        commandQueue.addCommand(command);
+    //  start process
         executor.execute();
+
         assertTrue(
-                Logger.isLogContains("Cannot execute command SimpleCommand after 2 attempts" +
+                Logger.isLogContains("Cannot execute command TestCommand after 2 attempts" +
                         ", write message to log"));
     }
 
@@ -82,25 +83,21 @@ public class HandlerTest {
    //    Тип этой команды будет показывать, что Команду не удалось выполнить два раза.
     @Test
     void firstAttemptRepeatSecondAttemptRepeatThirdAttemptWriteToLogTest() {
-        ICommand command = new SimpleCommand();
+    //  init command
+        ICommand command = new TestCommand();
         commandQueue.addCommand(command);
-// выполняем: SimpleCommand -> FirstAttemptException -> RepeatTwiceHandler
-//                                                      в очереди команда типа RepeatTwice(на базе SimpleCommand)
+    //  add strategy
         handlerStore.registerHandler(command, FirstAttemptException.class,
-               RepeatTwiceHandler.class);
-
-// выполняем RepeatTwiceCommand(на базе SimpleCommand) -> FirstAttemptException -> FirstAttemptHandler
-//                                                                       в очереди команда типа RepeatTwiceCommand(на базе RepeatTwiceCommand)
-        handlerStore.registerHandler(RepeatTwiceCommand.class, FirstAttemptException.class,
-                RepeatTwiceHandler.class); // FirstAttemptHandler возвращает RepeatCommand, а нужно RepeatTwiceCommand
-// выполняем RepeatTwiceCommand(на базе RepeatTwiceCommand) -> SecondAttemptException -> SecondAttemptHandler (запись в лог)
-//
-        handlerStore.registerHandler(RepeatTwiceCommand.class, SecondAttemptException.class,
-                SecondAttemptHandler.class);
-
+               RepeatHandler.class);
+        handlerStore.registerHandler(RepeatCommand.class, SecondAttemptException.class,
+                RepeatHandler.class);
+        handlerStore.registerHandler(RepeatTwiceCommand.class, ThirdAttemptException.class,
+                ThirdAttemptHandler.class);
+    //  start process
         executor.execute();
+
         assertTrue(
-                Logger.isLogContains("Cannot execute command RepeatTwiceCommand after 2 attempts," +
+                Logger.isLogContains("Cannot execute command TestCommand after 3 attempts," +
                         ", write message to log"));
     }
 

@@ -1,7 +1,6 @@
 package homework3.command;
 
 import homework3.Logger;
-import homework3.exceptions.WriteToLogCommandException;
 
 public class LogCommand implements ICommand {
 
@@ -10,7 +9,6 @@ public class LogCommand implements ICommand {
 
     public LogCommand() {
         this.command = this.getClass();
-        this.exception = new WriteToLogCommandException();
     }
 
     public LogCommand(Class<? extends ICommand> command, Exception e) {

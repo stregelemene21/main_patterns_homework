@@ -6,15 +6,18 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class CommandQueue {
-    // addLast() - добавить в конец
-    // peek() - взять первый элемент
+
     private static CommandQueue instance;
+
     public CommandQueue() {
 
     }
-    public static CommandQueue getInstance() {
+
+    public static CommandQueue getCommandQueue() {
         if (instance == null) {
-            instance = new CommandQueue();
+            synchronized (CommandQueue.class) {
+                instance = new CommandQueue();
+            }
         }
         return instance;
     }
