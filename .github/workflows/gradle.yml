@@ -25,8 +25,8 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 
-    - name: Run tests homework_2   
-      run: ./gradlew homework2Tests
+    - name: Run tests homework_3   
+      run: ./gradlew homework3Tests
        
   # dependency-submission:
 
