@@ -11,6 +11,10 @@ repositories {
 
 dependencies {
     implementation 'org.projectlombok:lombok:1.18.26'
+    implementation 'org.apache.logging.log4j:log4j-to-slf4j:2.12.2'
+    implementation 'ch.qos.logback:logback-classic:1.5.16'
+    implementation 'com.google.guava:guava:33.4.0-jre'
+    implementation 'commons-io:commons-io:2.18.0'
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
@@ -34,6 +38,17 @@ tasks.register('homework2Tests', Test) {
     useJUnitPlatform {
         includeTags('Homework2')
     }
+}
+
+tasks.register('homework3Tests', Test) {
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        exceptionFormat "full"
+    }
+    useJUnitPlatform {
+        includeTags('Homework3')
+    }
+    testLogging.exceptionFormat = 'full'
 }
 
 
