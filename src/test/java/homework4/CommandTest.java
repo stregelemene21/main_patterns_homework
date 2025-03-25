@@ -2,15 +2,19 @@ package homework4;
 
 import homework4.command.*;
 import homework4.entity.IMovingObject;
+import homework4.entity.IRotatingObject;
 import homework4.entity.Params.FuelCount;
 import homework4.entity.Spaceship;
+import homework4.entity.StaticGun;
 import homework4.exception.BurnFuelException;
 import homework4.exception.LowFuelException;
 import homework4.exception.MacroCommandException;
+import homework4.utils.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.LinkedList;
@@ -127,29 +131,60 @@ public class CommandTest {
         assertTrue(isLogContains("Command BurnFuelCommand has been thrown an exception"));
     }
 
+// 5.Реализовать команду для модификации вектора мгновенной скорости при повороте.
+// Необходимо учесть, что не каждый разворачивающийся объект движется.
 
     @ParameterizedTest
-    @ValueSource(ints = {45, 0, -45, 360})
-    void changeVelocityCommandForMovingObjectTest(int angle) {
-        assertEquals(45, spaceship.getAngle().angleDegrees());
-
-        new ChangeVelocityCommand(spaceship, new Angle(angle))
+    @CsvSource({
+            "1, 1",
+            "0, 0",
+             "-34, 154"
+    })
+    void changeVelocityCommandForMovingObjectTest(int x, int y) {
+        var targetVelocity = new Velocity(x, y);
+        new ChangeVelocityCommand(spaceship, targetVelocity)
                 .execute();
-        assertEquals(45 + angle,
-                spaceship.getAngle().angleDegrees());
 
+        assertEquals(spaceship.getVelocity(), targetVelocity);
     }
 
-    @Test
-    void changeVelocityCommandForStaticObjectTest() {
+    @ParameterizedTest
+    @CsvSource({
+            "1, 1",
+            "0, 0",
+            "-34, 154"
+    })
+    void changeVelocityCommandForStaticObjectTest(int x, int y) {
+        IRotatingObject staticGun = new StaticGun(
+                new Angle(50),
+                new Location(2, 3));
+        var startAngle = staticGun.getAngle().angleDegrees();
+        var targetVelocity = new Velocity(x, y);
 
+        new ChangeVelocityCommand(staticGun, targetVelocity).execute();
 
+        assertEquals(
+                normalizeAngle(startAngle +
+                        calculateAngleDegreesByVelocity(targetVelocity).angleDegrees()),
+                staticGun.getAngle().angleDegrees());
     }
 
+//    6.Реализовать команду поворота, которая еще и меняет вектор мгновенной скорости, если есть.
 
     @Test
-    void rotateAndChangeVelocityMacroCommandTest() {
+    void rotateAndChangeVelocityAndMoveMacroCommandTest() {
+        spaceship.setVelocity(new Velocity(1, 1));
+//        assertEquals(spaceship.getLocation(), new Location(1, 1));
+//        assertEquals(spaceship.getVelocity(), new Velocity(5, 5));
 
+        Queue<ICommand> commandQueue = new LinkedList<>();
+        commandQueue.add(new RotateCommand(spaceship, new Angle(45)));
+        //commandQueue.add(new MoveCommand(spaceship));
+
+        new MacroCommand(commandQueue).execute();
+
+        assertEquals(new Velocity(1, 2), spaceship.getVelocity());
+        //assertEquals(spaceship.getLocation(), new Location(1, 8));
     }
 
 

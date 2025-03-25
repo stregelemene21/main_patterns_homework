@@ -2,30 +2,30 @@ package homework4.command;
 
 import homework4.entity.IMovingObject;
 import homework4.entity.IRotatingObject;
-import homework4.entity.Params;
 import homework4.exception.ChangeVelocityException;
-import homework4.utils.Utils;
 import lombok.AllArgsConstructor;
 
-import java.util.Objects;
 
 import static homework4.entity.Params.*;
-import static homework4.utils.Utils.calculateNewVelocityByNewAngle;
+import static homework4.utils.Utils.*;
 
 @AllArgsConstructor
 public class ChangeVelocityCommand implements ICommand {
 
     Object object;
 
-    Angle angle;
+    Velocity velocity;
 
     @Override
     public void execute() {
         if (object instanceof IRotatingObject rotatingObj) {
-            rotatingObj.setAngle(angle);
+            var rotateAngle = calculateAngleDegreesByVelocity(velocity).angleDegrees();
+            rotatingObj.setAngle(
+                    calculateNewAngleForOnlyRotatingObject(
+                            rotatingObj, new Angle(rotateAngle)));
+
         } else if (object instanceof IMovingObject movingObj) {
-            movingObj.setVelocity(
-                    calculateNewVelocityByNewAngle(movingObj.getVelocity(), angle));
+            movingObj.setVelocity(velocity);
         } else {
             throw new ChangeVelocityException(object);
         }

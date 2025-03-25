@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import static homework4.entity.Params.*;
-import static homework4.utils.Utils.calculateAngleByVelocity;
+import static homework4.utils.Utils.calculateAngleDegreesByVelocity;
 import static homework4.utils.Utils.calculateNewVelocityByNewAngle;
 
 @Getter
@@ -20,7 +20,7 @@ public abstract class AbstractSpaceshipObject implements IMovingObject, IRotatin
 
     @Override
     public Angle getAngle() {
-        return calculateAngleByVelocity(velocity);
+        return calculateAngleDegreesByVelocity(velocity);
     }
 
     @Override
